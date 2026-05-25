@@ -8,15 +8,19 @@ import ProjectsSection from './components/ProjectsSection';
 import GallerySection from './components/GallerySection';
 import ContactSection from './components/ContactSection';
 import AdminDashboard from './components/AdminDashboard';
+import GameScreen from './components/GameScreen';
 import { PortfolioData, AnalyticsData } from './types';
 import { INITIAL_PORTFOLIO_DATA, INITIAL_ANALYTICS_DATA } from './data';
 
 export default function App() {
   const [preloaderComplete, setPreloaderComplete] = useState(false);
-  const [isDarkModeSection, setIsDarkModeSection] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0); // 0 at top, 1 past threshold
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('sami_theme_mode');
+    return saved ? saved === 'dark' : true; // Defaults to dark mode
+  });
   const [adminOpen, setAdminOpen] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const [currentView, setCurrentView] = useState<'portfolio' | 'game'>('portfolio');
 
   // Core portfolio state with structural persistence
   const [portfolioData, setPortfolioData] = useState<PortfolioData>(INITIAL_PORTFOLIO_DATA);
@@ -62,20 +66,13 @@ export default function App() {
     }
   }, []);
 
-  // Set up scroll track trigger to scale cursor and invert viewport background with smooth interpolation
-  useEffect(() => {
-    const handleScroll = () => {
-      const y = window.scrollY;
-      // Calculate a highly seamless scroll ratio over transition window (0 to 550px)
-      const progress = Math.min(1, Math.max(0, y / 550));
-      setScrollProgress(progress);
-      setIsDarkModeSection(y > 280);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    // Run initialization
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const handleThemeToggle = () => {
+    setIsDarkMode(prev => {
+      const next = !prev;
+      localStorage.setItem('sami_theme_mode', next ? 'dark' : 'light');
+      return next;
+    });
+  };
 
   // Update Portfolio database state
   const handleUpdatePortfolio = (updatedData: PortfolioData) => {
@@ -101,11 +98,9 @@ export default function App() {
     }
   };
 
-  // Interpolated background matching the editorial light to dark theme as user scrolls down
-  const bgR = Math.round(250 - 245 * scrollProgress);
-  const bgG = Math.round(250 - 245 * scrollProgress);
-  const bgB = Math.round(250 - 245 * scrollProgress);
-  const interpolatedBg = `rgb(${bgR}, ${bgG}, ${bgB})`;
+  const baseBgClass = isDarkMode 
+    ? 'bg-[#050505] text-white selection:bg-white selection:text-black' 
+    : 'bg-white text-neutral-900 selection:bg-black selection:text-white';
 
   return (
     <>
@@ -115,15 +110,10 @@ export default function App() {
       {preloaderComplete && (
         <div 
           id="root-viewport-wrap"
-          style={{ backgroundColor: interpolatedBg }}
-          className={`min-h-screen flex flex-col font-sans transition-colors duration-500 ease-out ${
-            isDarkModeSection 
-              ? 'text-white selection:bg-white selection:text-black' 
-              : 'text-neutral-900 selection:bg-black selection:text-white'
-          }`}
+          className={`min-h-screen flex flex-col font-sans transition-colors duration-500 ease-out ${baseBgClass}`}
         >
           {/* 2. Interactive Spring Cursor with backdrop inversion values */}
-          <CustomCursor isDarkModeSection={isDarkModeSection} />
+          <CustomCursor isDarkModeSection={isDarkMode} />
 
           {/* Physics-driven slow-floating global backdrop elements */}
           <PhysicsParticles />
@@ -133,35 +123,48 @@ export default function App() {
             onAdminClick={() => setAdminOpen(true)}
             isAdminLoggedIn={isAdminLoggedIn}
             onLogout={handleLogout}
-            isDarkModeSection={isDarkModeSection}
+            isDarkMode={isDarkMode}
+            onThemeToggle={handleThemeToggle}
+            currentView={currentView}
+            onViewChange={setCurrentView}
           />
 
-          {/* 4. Main Portfolio Layout Context */}
-          <main className="flex-1 w-full flex flex-col">
-            <HeroSection 
-              profile={portfolioData.profile} 
-              onContactClick={scrollToContact}
-              scrollProgress={scrollProgress}
+          {/* 4. Dynamic Main Viewport Context */}
+          {currentView === 'game' ? (
+            <GameScreen 
+              isDarkMode={isDarkMode} 
+              onBackToHome={() => setCurrentView('portfolio')} 
             />
+          ) : (
+            <main className="flex-1 w-full flex flex-col">
+              <HeroSection 
+                profile={portfolioData.profile} 
+                onContactClick={scrollToContact}
+                isDarkMode={isDarkMode}
+              />
 
-            <ProjectsSection 
-              projects={portfolioData.projects}
-            />
+              <ProjectsSection 
+                projects={portfolioData.projects}
+                isDarkMode={isDarkMode}
+              />
 
-            <GallerySection 
-              gallery={portfolioData.gallery}
-            />
+              <GallerySection 
+                gallery={portfolioData.gallery}
+                isDarkMode={isDarkMode}
+              />
 
-            <ContactSection 
-              profile={portfolioData.profile}
-            />
-          </main>
+              <ContactSection 
+                profile={portfolioData.profile}
+                isDarkMode={isDarkMode}
+              />
+            </main>
+          )}
 
           {/* 5. Minimalist High Contrast Footer */}
           <footer 
             id="system-footer"
-            className={`py-12 border-t z-10 text-center text-xs font-mono tracking-widest ${
-              isDarkModeSection 
+            className={`py-12 border-t z-10 text-center text-xs font-mono tracking-widest transition-colors duration-500 ${
+              isDarkMode 
                 ? 'bg-[#020202] text-neutral-600 border-neutral-900' 
                 : 'bg-white text-neutral-400 border-neutral-200'
             }`}

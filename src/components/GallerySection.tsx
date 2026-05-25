@@ -1,37 +1,42 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Maximize2, X, Award, MapPin, Calendar, Heart } from 'lucide-react';
+import { Maximize2, X, Award } from 'lucide-react';
 import { GalleryItem } from '../types';
 
 interface GallerySectionProps {
   gallery: GalleryItem[];
+  isDarkMode: boolean;
 }
 
-export default function GallerySection({ gallery }: GallerySectionProps) {
+export default function GallerySection({ gallery, isDarkMode }: GallerySectionProps) {
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
 
   return (
     <section 
       id="gallery" 
-      className="relative py-28 md:py-36 bg-[#0c0c0c] text-white border-t border-neutral-900 overflow-hidden"
+      className={`relative py-28 md:py-36 border-t overflow-hidden transition-colors duration-500 ${
+        isDarkMode 
+          ? 'bg-[#0c0c0c] text-white border-neutral-900' 
+          : 'bg-white text-neutral-950 border-neutral-200'
+      }`}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(255,255,255,0.01)_0%,transparent_60%)] pointer-events-none" />
+      <div className={`absolute inset-0 pointer-events-none transition-opacity duration-500 ${isDarkMode ? 'bg-[radial-gradient(ellipse_at_bottom,rgba(255,255,255,0.01)_0%,transparent_60%)] opacity-100' : 'bg-[radial-gradient(ellipse_at_bottom,rgba(0,0,0,0.02)_0%,transparent_60%)]'}`} />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12">
         
         {/* Gallery Headers */}
         <div className="max-w-xl mb-16 select-none">
           <div className="flex items-center gap-3 mb-3">
-            <span className="w-2 h-2 bg-white rounded-full inline-block"></span>
+            <span className={`w-2 h-2 rounded-full inline-block ${isDarkMode ? 'bg-white' : 'bg-black'}`}></span>
             <span className="text-[10px] font-mono tracking-[0.4em] text-neutral-500 uppercase block">
               Moments & Triumphs
             </span>
           </div>
-          <h2 className="text-3xl md:text-5xl font-sans font-black tracking-tighter text-white uppercase leading-[0.95]">
+          <h2 className={`text-3xl md:text-5xl font-sans font-black tracking-tighter uppercase leading-[0.95] transition-colors duration-500 ${isDarkMode ? 'text-white' : 'text-neutral-950'}`}>
             Milestone Log &<br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/85 to-white/40">Visual Archives</span>
+            <span className={`text-transparent bg-clip-text bg-gradient-to-r ${isDarkMode ? 'from-white via-white/85 to-white/40' : 'from-neutral-950 via-neutral-900 to-neutral-400'}`}>Visual Archives</span>
           </h2>
-          <p className="text-neutral-400 font-light mt-5 text-sm leading-relaxed max-w-lg">
+          <p className={`font-light mt-5 text-sm leading-relaxed max-w-lg transition-colors ${isDarkMode ? 'text-neutral-400' : 'text-neutral-600'}`}>
             A visual retrospective highlighting academic excellence, business venture milestones, and advocacy development.
           </p>
         </div>
@@ -47,11 +52,15 @@ export default function GallerySection({ gallery }: GallerySectionProps) {
                 key={item.id}
                 id={`gallery-item-${item.id}`}
                 onClick={() => setSelectedItem(item)}
-                className={`group relative overflow-hidden rounded-none bg-[#0a0a0a] border border-white/5 p-2.5 cursor-pointer hover:border-white transition-all duration-350 ${heightClass}`}
+                className={`group relative overflow-hidden rounded-none p-2.5 cursor-pointer transition-all duration-350 ${heightClass} ${
+                  isDarkMode 
+                    ? 'bg-[#0a0a0a] border-white/5 hover:border-white' 
+                    : 'bg-neutral-50 border-black/5 hover:border-black'
+                }`}
                 whileHover={{ y: -4 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
               >
-                <div className="w-full h-full relative overflow-hidden border border-white/5">
+                <div className={`w-full h-full relative overflow-hidden border ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
                   {/* Backdrop image */}
                   <img 
                     src={item.image} 
@@ -80,7 +89,7 @@ export default function GallerySection({ gallery }: GallerySectionProps) {
                     <h3 className="text-base font-bold text-white uppercase tracking-tight leading-tight mb-1">
                       {item.title}
                     </h3>
-                    <p className="text-[11px] text-neutral-400 font-light truncate max-w-sm">
+                    <p className="text-[11px] text-neutral-300 font-light truncate max-w-sm">
                       {item.description}
                     </p>
                   </div>
@@ -102,20 +111,26 @@ export default function GallerySection({ gallery }: GallerySectionProps) {
               onClick={() => setSelectedItem(null)}
             >
               <div 
-                className="relative max-w-4xl w-full flex flex-col md:flex-row bg-[#080808] rounded-none border border-white/15 p-2 overflow-hidden shadow-2xl"
+                className={`relative max-w-4xl w-full flex flex-col md:flex-row rounded-none border p-2 overflow-hidden shadow-2xl transition-colors duration-500 ${
+                  isDarkMode ? 'bg-[#080808] border-white/15' : 'bg-white border-black/15'
+                }`}
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Close Button */}
                 <button
                   id="lightbox-btn-close"
                   onClick={() => setSelectedItem(null)}
-                  className="absolute top-4 right-4 w-8 h-8 rounded-none bg-black hover:bg-neutral-900 text-white flex items-center justify-center border border-white/20 transition-colors z-10 cursor-pointer"
+                  className={`absolute top-4 right-4 w-8 h-8 rounded-none flex items-center justify-center border transition-colors z-10 cursor-pointer ${
+                    isDarkMode 
+                      ? 'bg-black hover:bg-neutral-900 text-white border-white/20' 
+                      : 'bg-white hover:bg-neutral-100 text-black border-black/20'
+                  }`}
                 >
                   <X className="w-4 h-4" />
                 </button>
 
                 {/* Left: Beautiful Large Picture */}
-                <div className="md:w-3/5 h-80 md:h-[500px] border border-white/5">
+                <div className={`md:w-3/5 h-80 md:h-[500px] border ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
                   <img 
                     src={selectedItem.image} 
                     alt={selectedItem.title} 
@@ -126,23 +141,29 @@ export default function GallerySection({ gallery }: GallerySectionProps) {
 
                 {/* Right: Picture Details */}
                 <div className="md:w-2/5 p-8 md:p-10 flex flex-col justify-center">
-                  <span className="text-[9px] uppercase font-mono tracking-[0.4em] text-white/55 mb-3 block">
+                  <span className={`text-[9px] uppercase font-mono tracking-[0.4em] mb-3 block ${isDarkMode ? 'text-white/55' : 'text-neutral-500'}`}>
                     {selectedItem.category} Milestones
                   </span>
-                  <h3 className="text-xl md:text-2xl font-bold uppercase tracking-tight text-white mb-4 leading-tight">
+                  <h3 className={`text-xl md:text-2xl font-bold uppercase tracking-tight mb-4 leading-tight transition-colors ${
+                    isDarkMode ? 'text-white' : 'text-neutral-950'
+                  }`}>
                     {selectedItem.title}
                   </h3>
-                  <p className="text-sm text-[#b5b5b5] font-light leading-relaxed mb-6">
+                  <p className={`text-sm font-light leading-relaxed mb-6 transition-colors ${
+                    isDarkMode ? 'text-[#b5b5b5]' : 'text-neutral-600'
+                  }`}>
                     {selectedItem.description}
                   </p>
 
                   {/* Stamp detail */}
-                  <div className="pt-6 border-t border-white/5 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-none bg-neutral-950 flex items-center justify-center text-white border border-white/10">
-                      <Award className="w-4 h-4 text-white" />
+                  <div className={`pt-6 border-t flex items-center gap-3 transition-colors ${isDarkMode ? 'border-white/5' : 'border-black/5'}`}>
+                    <div className={`w-8 h-8 rounded-none flex items-center justify-center border transition-colors ${
+                      isDarkMode ? 'bg-neutral-950 text-white border-white/10' : 'bg-neutral-100 text-black border-black/10'
+                    }`}>
+                      <Award className="w-4 h-4" />
                     </div>
                     <div>
-                      <span className="text-xs font-bold text-white block uppercase tracking-wider">Adnan Sami Archive</span>
+                      <span className={`text-xs font-bold block uppercase tracking-wider transition-colors ${isDarkMode ? 'text-white' : 'text-neutral-950'}`}>Adnan Sami Archive</span>
                       <span className="text-[9px] text-neutral-500 font-mono tracking-widest uppercase">Verified Entry Ref</span>
                     </div>
                   </div>

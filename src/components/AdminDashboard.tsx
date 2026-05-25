@@ -284,7 +284,7 @@ export default function AdminDashboard({
                   type="text" 
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="e.g. adnansami"
+                  placeholder="Enter username"
                   className="w-full px-4 py-3 rounded-xl bg-neutral-900 border border-neutral-800 text-sm focus:outline-none focus:border-white transition-all text-white placeholder-neutral-700"
                 />
               </div>
@@ -292,7 +292,6 @@ export default function AdminDashboard({
               <div className="flex flex-col gap-1.5">
                 <div className="flex justify-between items-center">
                   <label className="text-[10px] font-mono tracking-widest uppercase text-neutral-400 font-semibold">Access Password</label>
-                  <span className="text-[10px] text-neutral-600 italic">default: adn123@@</span>
                 </div>
                 <input 
                   type="password" 

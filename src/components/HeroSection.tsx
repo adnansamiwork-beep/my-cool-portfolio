@@ -1,78 +1,48 @@
 import { motion } from 'motion/react';
-import { Mail, GraduationCap, Landmark, Award, ArrowUpRight, Briefcase } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { ProfileInfo } from '../types';
 import Magnetic from './Magnetic';
 
 interface HeroSectionProps {
   profile: ProfileInfo;
   onContactClick: () => void;
-  scrollProgress?: number;
+  isDarkMode: boolean;
 }
 
-export default function HeroSection({ profile, onContactClick, scrollProgress = 0 }: HeroSectionProps) {
-  // Let's create an array of floating particles to render in the background
+export default function HeroSection({ profile, onContactClick, isDarkMode }: HeroSectionProps) {
   const particles = Array.from({ length: 12 });
 
-  // Dynamic color calculations based on scrollProgress
-  const bgR = Math.round(250 - (250 - 5) * scrollProgress);
-  const bgG = Math.round(250 - (250 - 5) * scrollProgress);
-  const bgB = Math.round(250 - (250 - 5) * scrollProgress);
-  const sectionBgColor = `rgb(${bgR}, ${bgG}, ${bgB})`;
+  const headingClass = isDarkMode ? 'text-white' : 'text-neutral-950';
+  const textGradColor = isDarkMode ? 'from-white via-white/80 to-white/40' : 'from-neutral-950 via-neutral-900/80 to-neutral-800/40';
+  const bioClass = isDarkMode ? 'text-neutral-400' : 'text-neutral-600';
+  const frameBgClass = isDarkMode ? 'bg-neutral-900 border-white/10' : 'bg-neutral-50 border-black/10';
+  const badgeClass = isDarkMode ? 'bg-black border-white text-white' : 'bg-white border-black text-black';
+  const greetingTextClass = isDarkMode ? 'text-neutral-400' : 'text-neutral-500';
+  const greetingLineClass = isDarkMode ? 'bg-neutral-700' : 'bg-neutral-300';
 
-  // Headings/Name text color: transition from charcoal (#0a0a0a) to white (#ffffff)
-  const textVal = Math.round(10 + (255 - 10) * scrollProgress);
-  const headingTextColor = `rgb(${textVal}, ${textVal}, ${textVal})`;
-
-  // Bio text color: transitioning from #4b5563 (neutral-600) to rgba(255, 255, 255, 0.6)
-  const bioR = Math.round(75 + (255 - 75) * scrollProgress);
-  const bioG = Math.round(85 + (255 - 85) * scrollProgress);
-  const bioB = Math.round(99 + (255 - 99) * scrollProgress);
-  const bioOpacity = 1 - 0.4 * scrollProgress;
-  const bioTextColor = `rgba(${bioR}, ${bioG}, ${bioB}, ${bioOpacity})`;
-
-  // Photo frame bg: transitions from pure white (#ffffff) to near black (#0d0d0d)
-  const frameBgR = Math.round(255 - (255 - 13) * scrollProgress);
-  const frameBgG = Math.round(255 - (255 - 13) * scrollProgress);
-  const frameBgB = Math.round(255 - (255 - 13) * scrollProgress);
-  const photoFrameBg = `rgb(${frameBgR}, ${frameBgG}, ${frameBgB})`;
-
-  // photo frame border: from rgba(10, 10, 10, 0.15) to rgba(255, 255, 255, 0.12)
-  const borderOpacity = 0.15 - 0.03 * scrollProgress;
-  const borderVal = Math.round(10 + 245 * scrollProgress);
-  const photoFrameBorder = `rgba(${borderVal}, ${borderVal}, ${borderVal}, ${borderOpacity})`;
-
-  // badge items border: from solid bg-neutral-900/5 to bg-white/5
-  const badgeBorderVal = Math.round(10 + 245 * scrollProgress);
-  const badgeBorderColor = `rgba(${badgeBorderVal}, ${badgeBorderVal}, ${badgeBorderVal}, ${0.15 - 0.05 * scrollProgress})`;
-  const badgeTextColor = `rgba(${Math.round(31 + 224 * scrollProgress)}, ${Math.round(41 + 214 * scrollProgress)}, ${Math.round(55 + 200 * scrollProgress)}, ${0.8 + 0.2 * scrollProgress})`;
-
-  // vertical guide text color
-  const guideR = Math.round(163 + 92 * scrollProgress);
-  const guideOpacity = 1 - 0.8 * scrollProgress; // fade text down
   const verticalGuideStyle = {
-    color: `rgba(${guideR}, ${guideR}, ${guideR}, ${guideOpacity})`,
     writingMode: 'vertical-rl' as const,
     transform: 'rotate(180deg)',
   };
 
-  // decorative corner shapes
-  const dotCornerColor = `rgb(${Math.round(10 + 245 * scrollProgress)}, ${Math.round(10 + 245 * scrollProgress)}, ${Math.round(10 + 245 * scrollProgress)})`;
-
   return (
     <section 
       id="hero" 
-      style={{ backgroundColor: sectionBgColor }}
-      className="relative min-h-screen py-24 md:py-32 flex items-center justify-center overflow-hidden border-b border-neutral-900/10 dark:border-white/5"
+      className={`relative min-h-[calc(100vh-4rem)] py-24 md:py-32 flex items-center justify-center overflow-hidden border-b transition-colors duration-500 ${
+        isDarkMode 
+          ? 'bg-[#050505] text-white border-neutral-900' 
+          : 'bg-white text-neutral-950 border-neutral-200'
+      }`}
     >
       {/* Editorial Gridlines & Accents */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/5 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[120px] pointer-events-none transition-colors duration-500 ${isDarkMode ? 'bg-white/5' : 'bg-black/5'}`}></div>
         
-        {/* Particle objects styled as minimal grey cells */}
+        {/* Particle objects */}
         {particles.map((_, i) => (
           <motion.div
             key={i}
-            className="absolute rounded-full bg-neutral-500/10 dark:bg-white/10"
+            className={`absolute rounded-full transition-colors duration-500 ${isDarkMode ? 'bg-white/10' : 'bg-black/10'}`}
             style={{
               width: Math.random() * 8 + 4,
               height: Math.random() * 8 + 4,
@@ -91,17 +61,17 @@ export default function HeroSection({ profile, onContactClick, scrollProgress = 
           />
         ))}
 
-        {/* Dynamic editorial guide-lines inside the background */}
-        <svg className="absolute inset-0 w-full h-full opacity-10 dark:opacity-20" xmlns="http://www.w3.org/2000/svg">
+        {/* Dynamic editorial guide-lines in the background */}
+        <svg className={`absolute inset-0 w-full h-full transition-opacity duration-500 ${isDarkMode ? 'opacity-10 dark:opacity-20 text-white' : 'opacity-10 text-black'}`} xmlns="http://www.w3.org/2000/svg">
           <line x1="0" y1="20%" x2="100%" y2="20%" stroke="currentColor" strokeWidth="1" strokeDasharray="1,6" />
           <line x1="0" y1="80%" x2="100%" y2="80%" stroke="currentColor" strokeWidth="1" strokeDasharray="1,6" />
           <line x1="12%" y1="0" x2="12%" y2="100%" stroke="currentColor" strokeWidth="1" strokeDasharray="1,6" />
           <line x1="88%" y1="0" x2="88%" y2="100%" stroke="currentColor" strokeWidth="1" strokeDasharray="1,6" />
         </svg>
 
-        {/* Vertical decorative lettering from Editorial concept */}
+        {/* Vertical decorative lettering */}
         <div 
-          className="hidden lg:flex absolute left-8 top-1/2 -translate-y-1/2 font-mono uppercase tracking-[0.5em] text-[9px] whitespace-nowrap" 
+          className={`hidden lg:flex absolute left-8 top-1/2 -translate-y-1/2 font-mono uppercase tracking-[0.5em] text-[10px] whitespace-nowrap transition-colors duration-500 ${greetingTextClass}`} 
           style={verticalGuideStyle}
         >
           PRECISION &bull; STRATEGY &bull; INNOVATION
@@ -114,8 +84,7 @@ export default function HeroSection({ profile, onContactClick, scrollProgress = 
         <div className="lg:col-span-5 flex justify-center items-center">
           <div className="relative">
             <div 
-              style={{ backgroundColor: photoFrameBg, borderColor: photoFrameBorder }}
-              className="w-72 h-88 md:w-80 md:h-[390px] border p-3 transform -rotate-2 hover:rotate-0 transition-all duration-500 shadow-xl"
+              className={`w-72 h-88 md:w-80 md:h-[390px] border p-3 transform -rotate-2 hover:rotate-0 transition-all duration-500 shadow-xl ${frameBgClass}`}
             >
               <div className="w-full h-full bg-[#111] overflow-hidden relative border border-white/5">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent z-10 pointer-events-none" />
@@ -130,16 +99,12 @@ export default function HeroSection({ profile, onContactClick, scrollProgress = 
             
             {/* Top-Rated Developer/Law badge */}
             <div 
-              style={{ backgroundColor: sectionBgColor }}
-              className="absolute -bottom-6 -right-6 w-32 h-32 border border-current rounded-full flex flex-col items-center justify-center text-current text-[9px] font-black uppercase tracking-tighter leading-tight text-center p-3 transform rotate-12 shadow-lg select-none"
+              className={`absolute -bottom-6 -right-6 w-32 h-32 border rounded-full flex flex-col items-center justify-center text-[9px] font-black uppercase tracking-tighter leading-tight text-center p-3 transform rotate-12 shadow-lg select-none transition-colors duration-300 ${badgeClass}`}
             >
               Top Rated<br/>Developer
             </div>
-            <div className="absolute top-0 right-0 w-2.5 h-2.5 bg-current"></div>
-            <div 
-              style={{ backgroundColor: dotCornerColor }}
-              className="absolute bottom-0 left-0 w-2.5 h-2.5"
-            ></div>
+            <div className={`absolute top-0 right-0 w-2.5 h-2.5 ${isDarkMode ? 'bg-white' : 'bg-black'}`}></div>
+            <div className={`absolute bottom-0 left-0 w-2.5 h-2.5 ${isDarkMode ? 'bg-white' : 'bg-black'}`}></div>
           </div>
         </div>
 
@@ -149,25 +114,21 @@ export default function HeroSection({ profile, onContactClick, scrollProgress = 
           {/* Greeting label */}
           <div className="space-y-2 mb-6">
             <div className="flex items-center gap-4 justify-center lg:justify-start">
-              <div className="h-[1px] w-12 bg-neutral-400 dark:bg-neutral-600"></div>
-              <span className="text-[11px] font-mono text-neutral-500 dark:text-neutral-400 uppercase tracking-widest">Sami Signature Portfolio</span>
+              <div className={`h-[1px] w-12 ${greetingLineClass}`}></div>
+              <span className={`text-[11px] font-mono uppercase tracking-widest ${greetingTextClass}`}>Sami Signature Portfolio</span>
             </div>
           </div>
 
           {/* Heading Name Bold Poppins Styled */}
           <motion.h1 
-            style={{ color: headingTextColor }}
-            className="text-5xl md:text-7xl font-sans font-black tracking-tighter uppercase leading-[0.9] mb-6 relative"
+            className={`text-5xl md:text-7xl font-sans font-black tracking-tighter uppercase leading-[0.9] mb-6 relative transition-colors duration-500 ${headingClass}`}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
             {profile.name.split(' ')[0]}<br/>
             <span 
-              style={{
-                backgroundImage: `linear-gradient(to right, ${headingTextColor}, rgba(${textVal}, ${textVal}, ${textVal}, 0.35))`
-              }}
-              className="text-transparent bg-clip-text"
+              className={`text-transparent bg-clip-text bg-gradient-to-r ${textGradColor}`}
             >
               {profile.name.split(' ').slice(1).join(' ') || 'SAMI'}
             </span>
@@ -185,11 +146,14 @@ export default function HeroSection({ profile, onContactClick, scrollProgress = 
               return (
                 <span 
                   key={badge}
-                  style={isFirst ? undefined : { backgroundColor: `rgba(${badgeBorderVal}, ${badgeBorderVal}, ${badgeBorderVal}, 0.05)`, borderColor: badgeBorderColor, color: badgeTextColor }}
-                  className={`px-3 py-1 text-[10px] font-bold tracking-widest uppercase border ${
+                  className={`px-3 py-1 text-[10px] font-bold tracking-widest uppercase border transition-all duration-300 ${
                     isFirst 
-                      ? 'bg-black dark:bg-white border-black dark:border-white text-white dark:text-black shadow-sm font-extrabold' 
-                      : ''
+                      ? isDarkMode 
+                          ? 'bg-white border-white text-black font-extrabold shadow-sm' 
+                          : 'bg-black border-black text-white font-extrabold shadow-sm'
+                      : isDarkMode
+                          ? 'bg-white/5 border-white/10 text-white hover:border-white/30'
+                          : 'bg-black/5 border-black/10 text-black hover:border-black/30'
                   }`}
                 >
                   {badge}
@@ -200,8 +164,7 @@ export default function HeroSection({ profile, onContactClick, scrollProgress = 
 
           {/* Description Bio text */}
           <motion.p 
-            style={{ color: bioTextColor }}
-            className="text-base md:text-[17px] leading-relaxed font-light max-w-md mb-10 text-center lg:text-left"
+            className={`text-base md:text-[17px] leading-relaxed font-light max-w-md mb-10 text-center lg:text-left transition-colors duration-500 ${bioClass}`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -220,7 +183,11 @@ export default function HeroSection({ profile, onContactClick, scrollProgress = 
               <button
                 id="hero-btn-contact-me"
                 onClick={onContactClick}
-                className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-8 py-3.5 border border-transparent bg-neutral-950 text-white dark:bg-white dark:text-black hover:bg-neutral-800 dark:hover:bg-neutral-100 font-extrabold uppercase tracking-widest text-[10px] transition-colors duration-300 cursor-pointer shadow-lg"
+                className={`w-full sm:w-auto flex items-center justify-center gap-2.5 px-8 py-3.5 border font-extrabold uppercase tracking-widest text-[10px] transition-all duration-300 cursor-pointer shadow-lg ${
+                  isDarkMode 
+                    ? 'border-transparent bg-white text-black hover:bg-neutral-900 hover:text-white hover:border-white/20' 
+                    : 'border-transparent bg-black text-white hover:bg-neutral-100 hover:text-black hover:border-black/20'
+                }`}
               >
                 <Mail className="w-3.5 h-3.5 ml-[-4px]" />
                 <span>Contact Me</span>
@@ -235,8 +202,11 @@ export default function HeroSection({ profile, onContactClick, scrollProgress = 
                   const el = document.getElementById('projects');
                   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }}
-                style={{ color: headingTextColor, borderColor: `rgba(${textVal}, ${textVal}, ${textVal}, 0.2)` }}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 bg-transparent font-bold uppercase tracking-widest text-[10px] border hover:border-current hover:text-current transition-colors cursor-pointer"
+                className={`w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 bg-transparent font-bold uppercase tracking-widest text-[10px] border transition-colors cursor-pointer ${
+                  isDarkMode 
+                    ? 'text-white border-white/25 hover:border-white' 
+                    : 'text-black border-black/25 hover:border-black'
+                }`}
               >
                 <span>View My Work</span>
                 <span className="text-xs">↓</span>
