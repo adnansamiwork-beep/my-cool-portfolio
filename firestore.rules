@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Allow reading and writing the custom portfolio document
+    match /portfolio/{portfolioId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // 3. Allow read and write for the analytics metrics
+    match /analytics/{analyticsId} {
+      allow read, write: if true;
+    }
+  }
+}
