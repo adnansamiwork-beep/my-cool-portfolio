@@ -2,71 +2,96 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
+import { initializeApp } from 'firebase/app';
+import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 
 import { INITIAL_PORTFOLIO_DATA, INITIAL_ANALYTICS_DATA } from './src/data';
 
 const PORT = 3000;
-const DATA_FILE = path.join(process.cwd(), 'sami-portfolio-data.json');
-const ANALYTICS_FILE = path.join(process.cwd(), 'sami-analytics-data.json');
+const CONFIG_FILE = path.join(process.cwd(), 'firebase-applet-config.json');
 
-// Initialize store files
-function setupStoreFiles() {
-  if (!fs.existsSync(DATA_FILE)) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(INITIAL_PORTFOLIO_DATA, null, 2), 'utf8');
+let dbInstance: any = null;
+
+function getDb() {
+  if (!dbInstance) {
+    if (fs.existsSync(CONFIG_FILE)) {
+      const config = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+      const firebaseApp = initializeApp(config);
+      dbInstance = getFirestore(firebaseApp, config.firestoreDatabaseId);
+    } else {
+      throw new Error('firebase-applet-config.json not found');
+    }
   }
-  if (!fs.existsSync(ANALYTICS_FILE)) {
-    fs.writeFileSync(ANALYTICS_FILE, JSON.stringify(INITIAL_ANALYTICS_DATA, null, 2), 'utf8');
-  }
+  return dbInstance;
 }
 
 async function startServer() {
-  setupStoreFiles();
   const app = express();
   app.use(express.json({ limit: '50mb' }));
 
   // API Routes
-  app.get('/api/portfolio', (req, res) => {
+  app.get('/api/portfolio', async (req, res) => {
     try {
-      const data = fs.readFileSync(DATA_FILE, 'utf8');
-      res.json(JSON.parse(data));
+      const db = getDb();
+      const docRef = doc(db, 'portfolio', 'sami');
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        res.json(docSnap.data());
+      } else {
+        // Bootstrap initial database values to the cloud
+        await setDoc(docRef, INITIAL_PORTFOLIO_DATA);
+        res.json(INITIAL_PORTFOLIO_DATA);
+      }
     } catch (e) {
-      console.error('Error reading portfolio data', e);
-      res.status(500).json({ error: 'Failed to read portfolio data' });
+      console.error('Error reading portfolio data from Firestore', e);
+      res.status(500).json({ error: 'Failed to read portfolio data from Firestore' });
     }
   });
 
-  app.post('/api/portfolio', (req, res) => {
+  app.post('/api/portfolio', async (req, res) => {
     try {
       const updatedData = req.body;
       if (!updatedData || !updatedData.profile) {
         return res.status(400).json({ error: 'Invalid portfolio data structure' });
       }
-      fs.writeFileSync(DATA_FILE, JSON.stringify(updatedData, null, 2), 'utf8');
+      const db = getDb();
+      const docRef = doc(db, 'portfolio', 'sami');
+      await setDoc(docRef, updatedData);
       res.json({ message: 'Success', data: updatedData });
     } catch (e) {
-      console.error('Error writing portfolio data', e);
-      res.status(500).json({ error: 'Failed to write portfolio data' });
+      console.error('Error writing portfolio data to Firestore', e);
+      res.status(500).json({ error: 'Failed to write portfolio data to Firestore' });
     }
   });
 
-  app.get('/api/analytics', (req, res) => {
+  app.get('/api/analytics', async (req, res) => {
     try {
-      const data = fs.readFileSync(ANALYTICS_FILE, 'utf8');
-      res.json(JSON.parse(data));
+      const db = getDb();
+      const docRef = doc(db, 'analytics', 'sami');
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        res.json(docSnap.data());
+      } else {
+        // Bootstrap initial database values to the cloud
+        await setDoc(docRef, INITIAL_ANALYTICS_DATA);
+        res.json(INITIAL_ANALYTICS_DATA);
+      }
     } catch (e) {
-      console.error('Error reading analytics data', e);
-      res.status(500).json({ error: 'Failed' });
+      console.error('Error reading analytics data from Firestore', e);
+      res.status(500).json({ error: 'Failed to read analytics from Firestore' });
     }
   });
 
-  app.post('/api/analytics', (req, res) => {
+  app.post('/api/analytics', async (req, res) => {
     try {
       const data = req.body;
-      fs.writeFileSync(ANALYTICS_FILE, JSON.stringify(data, null, 2), 'utf8');
+      const db = getDb();
+      const docRef = doc(db, 'analytics', 'sami');
+      await setDoc(docRef, data);
       res.json({ message: 'Success' });
     } catch (e) {
-      console.error('Error writing analytics data', e);
-      res.status(500).json({ error: 'Failed' });
+      console.error('Error writing analytics data to Firestore', e);
+      res.status(500).json({ error: 'Failed to write analytics to Firestore' });
     }
   });
 
@@ -91,3 +116,4 @@ async function startServer() {
 }
 
 startServer();
+
