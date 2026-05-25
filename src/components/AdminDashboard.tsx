@@ -38,6 +38,13 @@ export default function AdminDashboard({
   const [profileForm, setProfileForm] = useState({ ...portfolioData.profile });
   const [badgeInput, setBadgeInput] = useState('');
 
+  // Sync internal form state with updated database profile info when admin dashboard opens or profile shifts
+  React.useEffect(() => {
+    if (isOpen) {
+      setProfileForm({ ...portfolioData.profile });
+    }
+  }, [isOpen, portfolioData.profile]);
+
   // Password rotation state
   const [currentPassInput, setCurrentPassInput] = useState('');
   const [newPassInput, setNewPassInput] = useState('');
