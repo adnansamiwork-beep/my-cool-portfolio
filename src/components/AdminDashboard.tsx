@@ -37,6 +37,7 @@ export default function AdminDashboard({
   // Edit / Input States
   const [profileForm, setProfileForm] = useState({ ...portfolioData.profile });
   const [badgeInput, setBadgeInput] = useState('');
+  const [avatarLoadStatus, setAvatarLoadStatus] = useState<'idle' | 'loading' | 'loaded' | 'error'>('idle');
 
   // Sync internal form state with updated database profile info when admin dashboard opens or profile shifts
   React.useEffect(() => {
@@ -44,6 +45,15 @@ export default function AdminDashboard({
       setProfileForm({ ...portfolioData.profile });
     }
   }, [isOpen, portfolioData.profile]);
+
+  // Handle avatar URL loads
+  React.useEffect(() => {
+    if (!profileForm.avatar || profileForm.avatar.trim() === '') {
+      setAvatarLoadStatus('idle');
+    } else {
+      setAvatarLoadStatus('loading');
+    }
+  }, [profileForm.avatar]);
 
   // Password rotation state
   const [currentPassInput, setCurrentPassInput] = useState('');
@@ -508,6 +518,64 @@ export default function AdminDashboard({
                           onChange={(e) => setProfileForm({ ...profileForm, avatar: e.target.value })}
                           className="px-4 py-3 rounded-xl bg-[#0d0d0d] border border-neutral-800 text-sm focus:outline-none focus:border-white transition-all text-white"
                         />
+                        
+                        {/* Real-time image preview component */}
+                        <div className="mt-2 p-3 bg-[#080808] border border-neutral-900 rounded-xl flex items-center gap-4 transition-all duration-300">
+                          <div className="w-14 h-14 rounded-xl bg-neutral-950 overflow-hidden border border-white/5 relative flex-shrink-0 flex items-center justify-center">
+                            {profileForm.avatar && avatarLoadStatus !== 'idle' ? (
+                              <img 
+                                src={profileForm.avatar} 
+                                alt="Real-time preview" 
+                                className={`w-full h-full object-cover transition-opacity duration-300 ${avatarLoadStatus === 'loaded' ? 'opacity-100' : 'opacity-0'}`}
+                                referrerPolicy="no-referrer"
+                                onLoad={() => setAvatarLoadStatus('loaded')}
+                                onError={() => setAvatarLoadStatus('error')}
+                              />
+                            ) : null}
+                            
+                            {/* Visual Fallbacks for status */}
+                            {avatarLoadStatus === 'idle' && (
+                              <Image className="w-5 h-5 text-neutral-605" />
+                            )}
+                            {avatarLoadStatus === 'loading' && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-neutral-950">
+                                <span className="w-3.5 h-3.5 rounded-full border border-neutral-500 border-t-white animate-spin" />
+                              </div>
+                            )}
+                            {avatarLoadStatus === 'error' && (
+                              <X className="w-5 h-5 text-rose-500" />
+                            )}
+                          </div>
+
+                          <div className="flex-1 min-w-0 space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400 font-bold">Preview Status</span>
+                              {avatarLoadStatus === 'loaded' && (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-medium font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                  ✓ OK
+                                </span>
+                              )}
+                              {avatarLoadStatus === 'loading' && (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-medium font-mono bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                  ● Verifying...
+                                </span>
+                              )}
+                              {avatarLoadStatus === 'error' && (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-medium font-mono bg-rose-500/10 text-rose-450 border border-rose-500/25">
+                                  ✗ Error
+                                </span>
+                              )}
+                              {avatarLoadStatus === 'idle' && (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-medium font-mono bg-neutral-900 text-neutral-500 border border-neutral-800">
+                                  Empty
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-neutral-500 font-mono truncate leading-none">
+                              {profileForm.avatar ? profileForm.avatar : 'No image web link pasted yet'}
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
